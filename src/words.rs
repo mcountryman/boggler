@@ -59,7 +59,11 @@ impl<'grid, 'words> Iterator for GridWords<'grid, 'words> {
       let ch = self.chars.next();
       let ch = match ch {
         Some(ch) => ch,
-        None => return Some(&self.words[self.word]),
+        None => {
+          let word = Some(&self.words[self.word]);
+          self.next_word();
+          return word;
+        }
       };
 
       let node = self.graph.next_node(self.node, ch);
@@ -81,7 +85,7 @@ impl<'grid, 'words> Iterator for GridWords<'grid, 'words> {
 
 #[cfg(test)]
 mod tests {
-  use crate::grid::{graph::GridGraph, Grid};
+  use crate::grid::Grid;
   use crate::words::GridWords;
 
   #[test]
@@ -94,7 +98,9 @@ mod tests {
     let mut words = GridWords::new(&grid, &words);
 
     for word in &mut words {
-      println!("got word `{}`", word);
+      if word == "dendrite" {
+        println!("got word `{}`", word);
+      }
     }
 
     dbg!(words.word);

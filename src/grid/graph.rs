@@ -13,38 +13,39 @@ impl GridGraph {
   /// Constructs a [GridGraph] from a [Grid].
   pub fn new(grid: &Grid) -> Self {
     let root = 0;
-    let mut arena_coords = HashMap::new();
-    let mut arena = vec![GridNode {
-      children: HashMap::new(),
-    }];
+    let mut arena = vec![GridNode::default()];
+    let size = grid.size();
 
-    for y in 0..grid.size() {
-      for x in 0..grid.size() {
-        let mut children = HashMap::new();
+    for x in 0..size {
+      for y in 0..size {
+        let i = x * size + y;
+        let ch = grid.at((x, y));
 
-        for neighbor_coord in grid.neighbors((x, y)) {
-          let neighbor_ch = grid.at(neighbor_coord);
-          let neighbor = *arena_coords.entry(neighbor_coord).or_insert(arena.len());
-          if neighbor == arena.len() {
-            arena.push(GridNode {
-              children: HashMap::new(),
-            });
-          }
-
-          children
-            .entry(neighbor_ch)
-            .or_insert(Vec::new())
-            .push(neighbor);
-        }
-
-        let node = arena.len();
-
-        arena.push(GridNode { children });
+        arena.push(GridNode::default());
         arena[root]
           .children
-          .entry(grid.at((x, y)))
-          .or_insert(Vec::new())
-          .push(node);
+          .entry(ch)
+          .or_insert_with(Vec::default)
+          .push(i);
+      }
+    }
+
+    for x in 0..size {
+      for y in 0..size {
+        let i = x * size + y;
+        let node = &mut arena[i + 1];
+        let neighbors = grid.neighbors((x, y));
+
+        for (x, y) in neighbors {
+          let neighbor_i = x * size + y;
+          let neighbor_ch = grid.at((x, y));
+
+          node
+            .children
+            .entry(neighbor_ch)
+            .or_insert_with(Vec::default)
+            .push(neighbor_i);
+        }
       }
     }
 
@@ -73,7 +74,7 @@ impl GridGraph {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct GridNode {
   children: HashMap<char, Vec<usize>>,
 }
@@ -88,6 +89,6 @@ mod tests {
     let grid = Grid::new("modnstedetripyij").unwrap();
     let graph = GridGraph::new(&grid);
 
-    // dbg!(graph);
+    println!("{:?}", graph.arena[graph.root()]);
   }
 }
