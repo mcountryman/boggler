@@ -1,0 +1,12 @@
+[package]
+name = "boggler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eyre = "0.6"
+smallvec = "1.8"
+linked_hash_set = "0.1"
+
+[build-dependencies]
+ureq = "2.4"
