@@ -26,7 +26,7 @@ impl GridGraph {
           .children
           .entry(ch)
           .or_insert_with(Vec::default)
-          .push(i);
+          .push(i + 1);
       }
     }
 
@@ -44,7 +44,7 @@ impl GridGraph {
             .children
             .entry(neighbor_ch)
             .or_insert_with(Vec::default)
-            .push(neighbor_i);
+            .push(neighbor_i + 1);
         }
       }
     }
@@ -58,19 +58,12 @@ impl GridGraph {
   }
 
   /// Gets next grid nodes for supplied grid matching char.
-  pub fn next_node(&mut self, node: usize, ch: char) -> Option<usize> {
-    let found = self.arena.get(node);
-    let found = match found {
-      Some(node) => node,
-      None => return None,
-    };
-
-    let node = found
-      .children
-      .get(&ch)
-      .and_then(|nodes| nodes.first().cloned());
-
-    node
+  pub fn get_children_matching_ch(
+    &mut self,
+    node: usize,
+    ch: char,
+  ) -> Option<&Vec<usize>> {
+    self.arena.get(node)?.children.get(&ch)
   }
 }
 
@@ -86,7 +79,7 @@ mod tests {
 
   #[test]
   fn test_graph() {
-    let grid = Grid::new("modnstedetripyij").unwrap();
+    let grid = Grid::from_grid("modnstedetripyij").unwrap();
     let graph = GridGraph::new(&grid);
 
     println!("{:?}", graph.arena[graph.root()]);

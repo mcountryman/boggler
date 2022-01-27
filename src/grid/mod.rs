@@ -1,21 +1,44 @@
 //! Boggle grid enumeration.
+
 pub mod graph;
+pub mod words;
 
 use eyre::Result;
-use smallvec::{smallvec, SmallVec};
 
 /// A boggle grid.
 pub struct Grid {
   grid: Vec<char>,
-  neighbors_kernel: SmallVec<[(isize, isize); 8]>,
+  min_word_len: usize,
+  neighbors_kernel: Vec<(isize, isize)>,
 }
 
 impl Grid {
-  /// Create a new grid from a flattened square grid where nrows is length divided by two.
-  pub fn new(grid: impl AsRef<str>) -> Result<Self> {
-    Self::with_kernel(
+  /// Create a new grid with options.
+  pub fn new(
+    grid: impl AsRef<str>,
+    min_word_len: usize,
+    neighbors_kernel: impl Into<Vec<(isize, isize)>>,
+  ) -> Result<Self> {
+    let grid = grid.as_ref();
+    let grid = grid.chars().collect::<Vec<_>>();
+    let grid_len_sqrt = (grid.len() as f64).sqrt();
+    if (grid_len_sqrt.floor() - grid_len_sqrt).abs() > std::f64::EPSILON {
+      eyre::bail!("expected grid square grid, got {grid_len_sqrt} by {grid_len_sqrt}");
+    }
+
+    Ok(Self {
       grid,
-      smallvec![
+      min_word_len,
+      neighbors_kernel: neighbors_kernel.into(),
+    })
+  }
+
+  /// Create a new grid from a flattened square grid where nrows is length divided by two.
+  pub fn from_grid(grid: impl AsRef<str>) -> Result<Self> {
+    Self::new(
+      grid,
+      3,
+      vec![
         (-1, -1),
         (0, -1),
         (-1, 0),
@@ -26,22 +49,6 @@ impl Grid {
         (1, -1),
       ],
     )
-  }
-
-  pub fn with_kernel(
-    grid: impl AsRef<str>,
-    neighbors_kernel: impl Into<SmallVec<[(isize, isize); 8]>>,
-  ) -> Result<Self> {
-    let grid = grid.as_ref();
-    let grid = grid.chars().collect::<Vec<_>>();
-    if grid.len() % 2 != 0 {
-      panic!("grid length must be divisible by two");
-    }
-
-    Ok(Self {
-      grid,
-      neighbors_kernel: neighbors_kernel.into(),
-    })
   }
 
   /// Gets a character in the grid at specified coordinates.
@@ -61,11 +68,11 @@ impl Grid {
 
   /// Gets the shortest allowed word length.
   pub fn min_word_len(&self) -> usize {
-    self.size() - 1
+    self.min_word_len
   }
 
   /// Gets next logical point in the grid from the supplied point.
-  pub fn next(&self, mut at: (usize, usize)) -> Option<(usize, usize)> {
+  pub fn next(&self, at: (usize, usize)) -> Option<(usize, usize)> {
     let size = self.size();
 
     if at.0 + 1 < size {
@@ -116,7 +123,7 @@ mod tests {
 
   #[test]
   fn test_neighbors() {
-    let grid = Grid::new("modnstedetripyij").unwrap();
+    let grid = Grid::from_grid("modnstedetripyij").unwrap();
     let neighbors = grid.neighbors((0, 0));
 
     assert_eq!(neighbors.len(), 3);

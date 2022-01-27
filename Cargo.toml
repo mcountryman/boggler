@@ -5,8 +5,11 @@ edition = "2021"
 
 [dependencies]
 eyre = "0.6"
-smallvec = "1.8"
+clap = { version = "3.0", features = ["derive"] }
+crossterm = "0.22"
 linked_hash_set = "0.1"
 
 [build-dependencies]
 ureq = "2.4"
+regex = "1.5"
+flate2 = "1.0"
