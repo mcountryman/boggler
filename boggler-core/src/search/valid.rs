@@ -1,0 +1,1 @@
+//! Boggle board word validation.

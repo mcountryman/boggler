@@ -1,19 +1,19 @@
 //! Simple board cell neighbors iterator.
 
 use super::{cell::SimpleBoardCell, SimpleBoard};
-use crate::board::Board;
+use crate::{board::Board, charset::Charset};
 
 /// A simple board cell neighbors iterator.
-pub struct SimpleNeighbors<'board, 'buf> {
+pub struct SimpleNeighbors<'board, C: Charset> {
   x: u16,
   y: u16,
-  board: &'board SimpleBoard<'buf>,
+  board: &'board SimpleBoard<C>,
   kernel: usize,
 }
 
-impl<'board, 'buf> SimpleNeighbors<'board, 'buf> {
+impl<'board, C: Charset> SimpleNeighbors<'board, C> {
   /// Create a [SimpleNeighbors] iterator.
-  pub fn new(board: &'board SimpleBoard<'buf>, x: u16, y: u16) -> Self {
+  pub fn new(board: &'board SimpleBoard<C>, x: u16, y: u16) -> Self {
     Self {
       x,
       y,
@@ -23,7 +23,7 @@ impl<'board, 'buf> SimpleNeighbors<'board, 'buf> {
   }
 }
 
-impl<'board, 'buf> Iterator for SimpleNeighbors<'board, 'buf> {
+impl<'board, C: Charset> Iterator for SimpleNeighbors<'board, C> {
   type Item = SimpleBoardCell;
 
   fn next(&mut self) -> Option<Self::Item> {

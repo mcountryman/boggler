@@ -1,0 +1,19 @@
+[package]
+name = "boggler-dictionary"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ureq = "2.4"
+uneval = "0.2"
+bincode = "1.3"
+
+serde = "1.0"
+once_cell = "1.9"
+boggler-core = { path = "../boggler-core" }
+
+[build-dependencies]
+ureq = "2.4"
+serde = "1.0"
+uneval = "0.2"
+boggler-core = { path = "../boggler-core" }
